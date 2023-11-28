@@ -32,8 +32,6 @@ export const NetworkGraph = ({ issues, edges }: Props) => {
   const [simulating, setSimulating] = useState(false);
   const [nodes, setNodes] = useState<IssueNode[]>([]);
 
-  console.log("Network graph");
-
   useEffect(() => {
     if (!width || !height) return;
 

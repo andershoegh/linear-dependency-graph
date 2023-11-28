@@ -37,8 +37,6 @@ export default async function Page({ params }: { params: { cycle: string } }) {
     });
   }, []);
 
-  console.log(issues);
-
   return (
     <div className="relative">
       <Suspense
