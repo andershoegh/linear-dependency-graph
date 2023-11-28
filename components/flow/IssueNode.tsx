@@ -1,29 +1,27 @@
-import { ExtendedIssue } from "@/app/types";
+import { Issue } from "@/app/query";
 import React from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 
-const IssueNode = (props: NodeProps<ExtendedIssue>) => {
+const IssueNode = (props: NodeProps<Issue>) => {
   const {
-    data: { title, identifier, name },
+    data: { title, identifier },
   } = props;
 
   return (
-    <div className="rounded-xl group-[.is-simulating-node-position]:opacity-40 border border-muted-foreground bg-slate-900 text-card-foreground shadow w-64 h-28 flex items-center px-4 py-2 overflow-hidden  ">
+    <div className="rounded-xl bg-foreground text-primary-foreground group-[.is-simulating-node-position]:opacity-40 border border-muted-foreground shadow w-64 h-20 flex items-center px-4 py-2 overflow-hidden">
       <div className="">
         <div className="text-sm">
-          <p className="text-xs text-muted-foreground">
-            {identifier} - {name}
-          </p>
-          <p className="text-card-foreground line-clamp-2">{title}</p>
+          <p className="text-xs ">{identifier}</p>
+          <p className="line-clamp-2">{title}</p>
         </div>
-        <div className="flex gap-2 mt-2">
+        {/* <div className="flex gap-2 mt-2">
           <div className="p-2 bg-gray-200"></div>
           <div className="p-2 bg-gray-200"></div>
           <div className="p-2 bg-gray-200"></div>
-        </div>
+        </div> */}
       </div>
       <Handle
-        position={Position.Top}
+        position={Position.Right}
         type="source"
         style={{
           position: "absolute",

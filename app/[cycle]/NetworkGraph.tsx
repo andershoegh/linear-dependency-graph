@@ -1,16 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ExtendedIssue } from "./types";
 import {
-  SimulationNodeDatum,
   forceSimulation,
   forceLink,
   forceManyBody,
-  SimulationLinkDatum,
   forceX,
   forceY,
-  forceCenter,
 } from "d3-force";
 import ReactFlow, {
   Background,
@@ -19,48 +15,24 @@ import ReactFlow, {
   applyNodeChanges,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import useWindowDimensions from "./hooks/useWindowDimensions";
-import IssueNode from "@/components/flow/IssueNode";
+import useWindowDimensions from "../../lib/hooks/useWindowDimensions";
+
 import { Spinner } from "@/components/loading/spinner";
-import { edgeTypes, nodeTypes } from "@/components/flow/customTypes";
+import { Issues } from "../query";
+import { nodeTypes } from "@/components/flow/customTypes";
+import { Edge, IssueEdge, IssueNode } from "../types";
 
 type Props = {
-  issuesToVisualize: ExtendedIssue[];
+  issues: Issues;
+  edges: Edge[];
 };
 
-type IssueEdge<T extends SimulationNodeDatum> = SimulationLinkDatum<T> & {
-  target: string;
-  source: string;
-  val: number;
-  id: string;
-};
-
-type IssueNode = SimulationNodeDatum & {
-  data: ExtendedIssue & { label: string };
-  id: string;
-  type?: string;
-  position: { x: number; y: number };
-};
-
-export const NetworkGraph = ({ issuesToVisualize }: Props) => {
+export const NetworkGraph = ({ issues, edges }: Props) => {
+  const { height, width } = useWindowDimensions();
   const [simulating, setSimulating] = useState(false);
   const [nodes, setNodes] = useState<IssueNode[]>([]);
-  const { height, width } = useWindowDimensions();
 
-  //   const edges = [
-  //       {
-  //         type: "centeredEdge",
-  //         target: "b5a9b417-de46-4e97-abe2-5f86e7cfdd04",
-  //         source: "2e6a9915-8711-4e57-b9a6-f5aa965f16d2",
-  //         val: 1,
-  //         id:
-  //           "b5a9b417-de46-4e97-abe2-5f86e7cfdd04" +
-  //           "2e6a9915-8711-4e57-b9a6-f5aa965f16d2",
-  //       },
-  //   ];
-
-  // TODO Find edges
-  const edges = [issuesToVisualize.forEach((issue) => {})];
+  console.log("Network graph");
 
   useEffect(() => {
     if (!width || !height) return;
@@ -68,8 +40,8 @@ export const NetworkGraph = ({ issuesToVisualize }: Props) => {
     setSimulating(true);
 
     const simulation = forceSimulation<Omit<IssueNode, "position">>(
-      issuesToVisualize.map((issue) => ({
-        data: { ...issue, label: issue.identifier },
+      issues.map((issue) => ({
+        data: issue,
         id: issue.id,
         type: "issueNode",
       }))
@@ -77,14 +49,15 @@ export const NetworkGraph = ({ issuesToVisualize }: Props) => {
       .force(
         "link",
         forceLink<IssueNode, IssueEdge<IssueNode>>(edges)
-          .id((d) => d.data.id)
-          .distance(190)
+          .id((d) => {
+            return d.data.id;
+          })
+          .distance(210)
       )
       .force("charge", forceManyBody().strength(-2500))
       .force("x", forceX())
       .force("y", forceY())
       .on("tick", () => {
-        console.log("Tick");
         setNodes(
           simulation.nodes().map((node) => {
             return {
@@ -97,7 +70,7 @@ export const NetworkGraph = ({ issuesToVisualize }: Props) => {
       .on("end", () => {
         setSimulating(false);
       });
-  }, [height, issuesToVisualize, width]);
+  }, [edges, height, issues, width]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) =>
@@ -112,7 +85,6 @@ export const NetworkGraph = ({ issuesToVisualize }: Props) => {
         className={` ${simulating && "group is-simulating-node-position"}`}
         onNodesChange={onNodesChange}
         edges={edges}
-        edgeTypes={edgeTypes}
         fitView
         nodeTypes={nodeTypes}
         nodesDraggable={true}
